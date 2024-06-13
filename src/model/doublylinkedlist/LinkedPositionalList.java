@@ -5,7 +5,7 @@ import model.positionalList.PositionalList;
 
 public class LinkedPositionalList <E> implements PositionalList<E> {
 
-	private static class Node<E>{
+	private static class Node<E> implements Position<E>{
 	private E element;
 	private Node<E> next;
 	private Node<E> prev;
@@ -55,14 +55,36 @@ public class LinkedPositionalList <E> implements PositionalList<E> {
 	}
 	
 		
-	}
+	}//end Node class
 	
 	
 	private int size = 0;
-	private Node<E>head;
-	private Node<E>tail;
+	private Node<E>header;
+	private Node<E>tailer;
 	
-	//constructs empty 
+	
+	//constructs empty list
+	public LinkedPositionalList() {
+		header = new Node<>(null,null,null);
+		tailer = new Node<>(null,header,null);
+		header.setNext(tailer);
+	}
+	
+	/** Validates the position and returns it as a node. */
+	private Node<E> validate(Position<E>p) throws IllegalArgumentException{
+		if(!(p instanceof Node)) throw new IllegalArgumentException("Invalid p");
+		Node<E> node = (Node<E>)p;
+		if(node.getNext() == null)
+			throw new IllegalArgumentException("p is nolonger in the list");
+		return node;
+	}
+	
+	//returns the given node as aposition or null if its asentinel
+	private Position<E>position(Node<E> node){
+		if(node == header || node == tailer)
+			return null;
+		return  node;
+	}
 	
 	
 	@Override
@@ -78,62 +100,87 @@ public class LinkedPositionalList <E> implements PositionalList<E> {
 
 	@Override
 	public Position<E> first() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return position(header);
 	}
 
 	@Override
 	public Position<E> last() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return position(tailer);
 	}
 
 	@Override
 	public Position<E> before(Position<E> p) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
+		Node<E>node = validate(p);
+		
+		return position(node.getPrev());
 	}
 
 	@Override
 	public Position<E> after(Position<E> p) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
+		Node<E>node = validate(p);
+		
+		return position(node.getNext());
 	}
 
+	//adds elememnt e to the linked list between the given nodes
+	private Position<E>addBetween(E e,Node<E>prev,Node<E>nex){
+		Node<E> newnode = new Node<>(e,prev,nex);
+		prev.setNext(newnode);
+		nex.setPrev(newnode);
+		size++;
+		return  newnode;
+	}
 	@Override
 	public Position<E> addFirst(E e) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return addBetween(e,header,header.getNext());
 	}
 
 	@Override
 	public Position<E> addLast(E e) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return addBetween(e,tailer.getPrev(),tailer);
 	}
 
 	@Override
 	public Position<E> addBefore(Position<E> p, E e) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
+	
+		Node<E>node = validate(p);
+		return addBetween(e,node.getPrev(),node);
 	}
 
 	@Override
 	public Position<E> addAfter(Position<E> p, E e) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
+		Node<E>node = validate(p);
+		return addBetween(e,node,node.getNext());
 	}
 
 	@Override
 	public E set(Position<E> p, E e) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
+	
+		Node<E> node = validate(p);
+		E ans = node.getElement();
+		node.setElement(e);
+		
+		return ans;
 	}
 
 	@Override
 	public E remove(Position<E> p) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
+		Node<E> node = validate(p);
+		Node<E>prev = node.getPrev();
+		Node<E>nex = node.getNext();
+		prev.setNext(nex);
+		nex.setPrev(prev);
+		size--;
+		E ans = node.getElement();
+		node.setElement(null);
+		node.setNext(null);
+		node.setPrev(null);
+		
+		return ans;
 	}
 
 }
